@@ -31,7 +31,7 @@ target_link_libraries(my_app PRIVATE svdpi::svdpi)
 # or via FetchContent
 include(FetchContent)
 FetchContent_Declare(svdpi
-    GIT_REPOSITORY <repository-url>
+    GIT_REPOSITORY https://github.com/kpskp77/svdpi.git
     GIT_TAG        main
 )
 FetchContent_MakeAvailable(svdpi)
