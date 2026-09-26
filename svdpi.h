@@ -292,7 +292,8 @@ XXTERN int svPutUserData(const svScope scope, void* userKey, void* userData);
  * stored by a call to svPutUserData(). See the comment above
  * svPutUserData() for an explanation of userKey, as well as
  * restrictions on NULL and illegal svScope and userKey values.
- * This function returns NULL for all error cases, 0 upon success.
+ * This function returns NULL for all error cases, and a non-Null
+ * user data pointer upon success.
  * This function also returns NULL in the event that a prior call
  * to svPutUserData() was never made.
  */
@@ -412,7 +413,7 @@ XXTERN void svPutSelectLogic(svLogicPackedArrRef d, int i, svLogic s);
  * the array in the implementation representation and the canonical array.
  *
  * s=source, d=destination, i=starting bit index, w=width
- * like for variable part-selects; limitations: w <=
+ * like for variable part-selects; limitations: w <= 32
  */
 
 /* canonical <-- actual */

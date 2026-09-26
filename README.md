@@ -2,7 +2,7 @@
 
 Single-header [SystemVerilog Direct Programming Interface (DPI)](https://en.wikipedia.org/wiki/SystemVerilog_DPI) header for C and C++, as defined in IEEE 1800.
 
-`svedpi.h` provides the canonical data types, constants, and function prototypes used to write DPI-C imported functions and interface with the simulator.
+`svdpi.h` provides the canonical data types, constants, and function prototypes used to write DPI-C imported functions and interface with the simulator.
 
 ## Features
 
