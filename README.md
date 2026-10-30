@@ -1,12 +1,24 @@
 # svdpi
 
-Single-header [SystemVerilog Direct Programming Interface (DPI)](https://en.wikipedia.org/wiki/SystemVerilog_DPI) header for C and C++, as defined in IEEE 1800.
+C and C++ headers for the [SystemVerilog Direct Programming Interface (DPI)](https://en.wikipedia.org/wiki/SystemVerilog_DPI) and the Programming Language Interface (PLI/VPI), as defined in IEEE Std 1800-2023.
 
-`svdpi.h` provides the canonical data types, constants, and function prototypes used to write DPI-C imported functions and interface with the simulator.
+`svdpi.h` provides the canonical data types, constants, and function prototypes used to write DPI-C imported functions and interface with the simulator. `vpi_user.h` and `sv_vpi_user.h` provide the corresponding VPI API used to write user system tasks/functions, callbacks, and other simulator extensions.
+
+The headers follow the standard's own header listings from IEEE Std 1800-2023.
+
+## Headers
+
+| Header | Description |
+|--------|-------------|
+| `svdpi.h` | DPI data types, constants, and function prototypes (IEEE 1800 clause 35) |
+| `vpi_user.h` | VPI object types, properties, structures, and routine declarations (clause 36); includes `vpi_compatibility.h` |
+| `sv_vpi_user.h` | SystemVerilog VPI extensions — extra object types, properties, callbacks, coverage VPI, and assertion VPI; includes `vpi_user.h` |
+| `vpi_compatibility.h` | Version-selected backwards-compatibility aliases for the VPI routines. Included by `vpi_user.h`; never include it directly |
 
 ## Features
 
 - **Header-only** — no build step, no dependencies
+- **DPI and VPI in one package** — `svdpi.h` and the VPI headers can be included from the same translation unit, in either order
 - **C and C++ compatible** — `extern "C"` guards included; C++11 or later for C++ consumers
 - **Portable** — handles MSVC, MinGW, Cygwin, Linux, and other Unix platforms
 - **CMake support** — `svdpi::svdpi` interface target for `add_subdirectory` / FetchContent
@@ -15,11 +27,15 @@ Single-header [SystemVerilog Direct Programming Interface (DPI)](https://en.wiki
 
 ### Standalone
 
-Copy `svdpi.h` and add the project root to your include path:
+Copy the headers and add the project root to your include path:
 
 ```cpp
-#include <svdpi.h>
+#include <svdpi.h>       // DPI
+#include <vpi_user.h>    // VPI (PLI) — IEEE 1364/1800 base API
+#include <sv_vpi_user.h> // VPI plus SystemVerilog extensions
 ```
+
+`sv_vpi_user.h` includes `vpi_user.h` for you; include it alone if you only need the base VPI API.
 
 ### CMake
 
@@ -38,79 +54,14 @@ FetchContent_MakeAvailable(svdpi)
 target_link_libraries(my_app PRIVATE svdpi::svdpi)
 ```
 
-To install the header and export CMake package targets:
+To install the headers and export CMake package targets:
 
 ```bash
 cmake -S . -B build
-cmake --install build --prefix /usr/local   # installs svdpi.h to include/ and svdpiTargets.cmake to lib/cmake/svdpi
+cmake --install build --prefix /usr/local   # installs all four headers to include/ and svdpiTargets.cmake to lib/cmake/svdpi
 ```
-
-## API overview
-
-### Data types
-
-| Type | Description |
-|------|-------------|
-| `svBit`, `svLogic`, `svScalar` | 2-state / 4-state scalar values |
-| `svBitVecVal` | Canonical packed 2-state vector (`uint32_t` chunks) |
-| `svLogicVecVal` | Canonical packed 4-state vector (`aval`/`bval` pair per chunk) |
-| `svOpenArrayHandle` | Opaque handle to an open (unsized) array |
-| `svScope` | Opaque handle to a module/interface scope |
-| `svTimeVal` | Simulation time value |
-
-Canonical scalar values: `sv_0`, `sv_1`, `sv_z`, `sv_x`.
-
-### Helper macros
-
-- `SV_PACKED_DATA_NELEMS(WIDTH)` — number of 32-bit chunks for a packed array of the given width
-- `SV_MASK(N)`, `SV_GET_UNSIGNED_BITS(V, N)`, `SV_GET_SIGNED_BITS(V, N)` — mask off unused bits
-
-### Function groups
-
-- **Bit- and part-select**: `svGetBitselBit`, `svPutBitselLogic`, `svGetPartselBit`, `svPutPartselLogic`, ...
-- **Open-array queries**: `svLeft`, `svRight`, `svLow`, `svHigh`, `svSize`, `svDimensions`, `svGetArrayPtr`, `svGetArrElemPtr1/2/3`, ...
-- **Array element copy** (simulator ↔ user space): `svGetBitArrElem1VecVal`, `svPutLogicArrElem3VecVal`, ...
-- **DPI context / scope**: `svGetScope`, `svSetScope`, `svGetNameFromScope`, `svGetScopeFromName`
-- **User data**: `svPutUserData`, `svGetUserData`
-- **Disable protocol**: `svIsDisabledState`, `svAckDisabledState`
-- **Time**: `svGetTime`, `svGetTimeUnit`, `svGetTimePrecision`
-- **Misc**: `svDpiVersion`, `svGetCallerInfo`
-- **Deprecated** (IEEE 1800-compliant tools may not support): `svBitVec32`/`svLogicVec32` based APIs — `svPutBitVec32`, `svGetPartSelectBit`, `svGetBits`, `svGet64Bits`, ...
-
-See the comments in `svdpi.h` for full documentation of each function.
-
-## Example
-
-SystemVerilog side — declare an imported function:
-
-```systemverilog
-module top;
-    import "DPI-C" function int factorial(int n);
-    initial $display("factorial(5) = %0d", factorial(5));
-endmodule
-```
-
-C++ side — implement it using this header:
-
-```cpp
-#include <svdpi.h>
-
-extern "C" int factorial(int n) {
-    return n <= 1 ? 1 : n * factorial(n - 1);
-}
-```
-
-Compile as a shared library (e.g. `g++ -shared -fPIC -I/path/to/svdpi factorial.cpp -o factorial.so`) and load it with your simulator's DPI mechanism (e.g. `-sv_lib`).
-
-## Notes
-
-- **Declarations only.** This header declares the DPI functions; the implementations are provided by the simulator at load/link time. Do not attempt to link them from a static library.
-- **Simulator compatibility.** Simulators ship their own `svdpi.h`. If you hit compatibility issues, use the header bundled with your simulator — the API surface is the same.
-- **Windows.** `DPI_DLLESPEC` / `DPI_DLLISPEC` expand to `__declspec(dllexport)` / `__declspec(dllimport)` on MSVC/MinGW/Cygwin, and to nothing elsewhere.
-- **Custom linkage.** Define `DPI_EXTERN` before including the header to override how the prototypes are emitted.
-- The header also defines the PLI-compatible types `s_vpi_vecval` and `s_vpi_time` (guarded by `VPI_VECVAL` / `VPI_TIME`).
 
 ## References
 
-- [IEEE 1800 SystemVerilog LRM](https://ieeexplore.ieee.org/document/8299595) — clause 35, "Direct programming interface"
+- [IEEE Std 1800-2023](https://ieeexplore.ieee.org/document/10458102) — clause 35, "Direct programming interface"; clause 36, "Programming language interface (PLI/VPI)"
 - [Accellera SystemVerilog](https://www.accellera.org/downloads/standards/systemverilog)

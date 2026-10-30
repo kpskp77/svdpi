@@ -6,14 +6,11 @@
  * This file contains the constant definitions, structure definitions,
  * and routine declarations used by SystemVerilog DPI.
  */
-
 #ifndef INCLUDED_SVDPI
 #define INCLUDED_SVDPI
-
 #ifdef __cplusplus
 extern "C" {
 #endif
-
 /* Define size-critical types on all OS platforms. */
 #if defined(_MSC_VER)
 typedef unsigned __int64 uint64_t;
@@ -29,26 +26,22 @@ typedef signed __int8 int8_t;
 #else
 #include <sys/types.h>
 #endif
-
 /* Use to import a symbol into dll */
 #if (defined(_MSC_VER) || defined(__MINGW32__) || defined(__CYGWIN__))
 #define DPI_DLLISPEC __declspec(dllimport)
 #else
 #define DPI_DLLISPEC
 #endif
-
 /* Use to export a symbol from dll */
 #if (defined(_MSC_VER) || defined(__MINGW32__) || defined(__CYGWIN__))
 #define DPI_DLLESPEC __declspec(dllexport)
 #else
 #define DPI_DLLESPEC
 #endif
-
 /* Use to mark a function as external */
 #ifndef DPI_EXTERN
 #define DPI_EXTERN
 #endif
-
 #ifndef DPI_PROTOTYPES
 #define DPI_PROTOTYPES
 /* object is defined imported by the application */
@@ -56,18 +49,15 @@ typedef signed __int8 int8_t;
 /* object is exported by the application */
 #define EETERN DPI_EXTERN DPI_DLLESPEC
 #endif
-
 /* canonical representation */
 #define sv_0 0
 #define sv_1 1
 #define sv_z 2
 #define sv_x 3
-
 /* common type for 'bit' and 'logic' scalars. */
 typedef uint8_t svScalar;
 typedef svScalar svBit;   /* scalar */
 typedef svScalar svLogic; /* scalar */
-
 /*
  * DPI representation of packed arrays.
  * 2-state and 4-state vectors, exactly the same as PLI's avalue/bvalue.
@@ -75,51 +65,39 @@ typedef svScalar svLogic; /* scalar */
 #ifndef VPI_VECVAL
 #define VPI_VECVAL
 typedef struct t_vpi_vecval {
-    uint32_t aval;
-    uint32_t bval;
+  uint32_t aval;
+  uint32_t bval;
 } s_vpi_vecval, *p_vpi_vecval;
 #endif
-
 /* (a chunk of) packed logic array */
 typedef s_vpi_vecval svLogicVecVal;
-
 /* (a chunk of) packed bit array */
 typedef uint32_t svBitVecVal;
-
 /* Number of chunks required to represent the given width packed array */
 #define SV_PACKED_DATA_NELEMS(WIDTH) (((WIDTH) + 31) >> 5)
-
 /*
  * Because the contents of the unused bits is undetermined,
  * the following macros can be handy.
  */
 #define SV_MASK(N) (~(-1 << (N)))
-
 #define SV_GET_UNSIGNED_BITS(VALUE, N) ((N) == 32 ? (VALUE) : ((VALUE) & SV_MASK(N)))
-
-#define SV_GET_SIGNED_BITS(VALUE, N) \
-    ((N) == 32 ? (VALUE) : (((VALUE) & (1 << (N))) ? ((VALUE) | ~SV_MASK(N)) : ((VALUE) & SV_MASK(N))))
-
+#define SV_GET_SIGNED_BITS(VALUE, N) ((N) == 32 ? (VALUE) : (((VALUE) & (1 << (N))) ? ((VALUE) | ~SV_MASK(N)) : ((VALUE) & SV_MASK(N))))
 #ifndef VPI_TIME
 #define VPI_TIME
 typedef struct t_vpi_time {
-    int32_t type;
-    uint32_t high, low;
-    double real;
+  int32_t type;
+  uint32_t high, low;
+  double real;
 } s_vpi_time, *p_vpi_time;
-
 #define vpiScaledRealTime 1
 #define vpiSimTime 2
 #define vpiSuppressTime 3
 #endif
-
 /* time value */
 typedef s_vpi_time svTimeVal;
-
 /* time value types */
 #define sv_scaled_real_time vpiScaledRealTime
 #define sv_sim_time vpiSimTime
-
 /*
  * Implementation-dependent representation.
  */
@@ -127,13 +105,10 @@ typedef s_vpi_time svTimeVal;
  * Return implementation version information string ("1800-2005" or "SV3.1a").
  */
 XXTERN const char* svDpiVersion(void);
-
 /* a handle to a scope (an instance of a module or interface) */
 XXTERN typedef void* svScope;
-
 /* a handle to a generic object (actually, unsized array) */
 XXTERN typedef void* svOpenArrayHandle;
-
 /*
  * Bit-select utility functions.
  *
@@ -143,11 +118,9 @@ XXTERN typedef void* svOpenArrayHandle;
 /* s=source, i=bit-index */
 XXTERN svBit svGetBitselBit(const svBitVecVal* s, int i);
 XXTERN svLogic svGetBitselLogic(const svLogicVecVal* s, int i);
-
 /* d=destination, i=bit-index, s=scalar */
 XXTERN void svPutBitselBit(svBitVecVal* d, int i, svBit s);
 XXTERN void svPutBitselLogic(svLogicVecVal* d, int i, svLogic s);
-
 /*
  * Part-select utility functions.
  *
@@ -180,27 +153,22 @@ XXTERN int svHigh(const svOpenArrayHandle h, int d);
 XXTERN int svIncrement(const svOpenArrayHandle h, int d);
 XXTERN int svSize(const svOpenArrayHandle h, int d);
 XXTERN int svDimensions(const svOpenArrayHandle h);
-
 /*
  * Pointer to the actual representation of the whole array of any type
  * NULL if not in C layout
  */
 XXTERN void* svGetArrayPtr(const svOpenArrayHandle);
-
 /* total size in bytes or 0 if not in C layout */
 XXTERN int svSizeOfArray(const svOpenArrayHandle);
-
 /*
  * Return a pointer to an element of the array
  * or NULL if index outside the range or null pointer
  */
 XXTERN void* svGetArrElemPtr(const svOpenArrayHandle, int indx1, ...);
-
 /* specialized versions for 1-, 2- and 3-dimensional arrays: */
 XXTERN void* svGetArrElemPtr1(const svOpenArrayHandle, int indx1);
 XXTERN void* svGetArrElemPtr2(const svOpenArrayHandle, int indx1, int indx2);
 XXTERN void* svGetArrElemPtr3(const svOpenArrayHandle, int indx1, int indx2, int indx3);
-
 /*
  * Functions for copying between simulator storage and user space.
  * These functions copy the whole packed array in either direction.
@@ -217,7 +185,6 @@ XXTERN void svPutLogicArrElemVecVal(const svOpenArrayHandle d, const svLogicVecV
 XXTERN void svPutLogicArrElem1VecVal(const svOpenArrayHandle d, const svLogicVecVal* s, int indx1);
 XXTERN void svPutLogicArrElem2VecVal(const svOpenArrayHandle d, const svLogicVecVal* s, int indx1, int indx2);
 XXTERN void svPutLogicArrElem3VecVal(const svOpenArrayHandle d, const svLogicVecVal* s, int indx1, int indx2, int indx3);
-
 /* From simulator storage into user space */
 XXTERN void svGetBitArrElemVecVal(svBitVecVal* d, const svOpenArrayHandle s, int indx1, ...);
 XXTERN void svGetBitArrElem1VecVal(svBitVecVal* d, const svOpenArrayHandle s, int indx1);
@@ -243,7 +210,6 @@ XXTERN void svPutBitArrElem(const svOpenArrayHandle d, svBit value, int indx1, .
 XXTERN void svPutBitArrElem1(const svOpenArrayHandle d, svBit value, int indx1);
 XXTERN void svPutBitArrElem2(const svOpenArrayHandle d, svBit value, int indx1, int indx2);
 XXTERN void svPutBitArrElem3(const svOpenArrayHandle d, svBit value, int indx1, int indx2, int indx3);
-
 /* Functions for working with DPI context */
 /*
  * Retrieve the active instance scope currently associated with the executing
@@ -252,7 +218,6 @@ XXTERN void svPutBitArrElem3(const svOpenArrayHandle d, svBit value, int indx1, 
  * Returns NULL if called from C code that is *not* an imported function.
  */
 XXTERN svScope svGetScope(void);
-
 /*
  * Set context for subsequent export function execution.
  * This function shall be called before calling an export function, unless
@@ -262,17 +227,14 @@ XXTERN svScope svGetScope(void);
  * The return is the previous active scope (per svGetScope)
  */
 XXTERN svScope svSetScope(const svScope scope);
-
 /* Gets the fully qualified name of a scope handle */
 XXTERN const char* svGetNameFromScope(const svScope);
-
 /*
  * Retrieve svScope to instance scope of an arbitrary function declaration.
  * (can be either module, program, interface, or generate scope)
  * The return value shall be NULL for unrecognized scope names.
  */
 XXTERN svScope svGetScopeFromName(const char* scopeName);
-
 /*
  * Store an arbitrary user data pointer for later retrieval by svGetUserData()
  * The userKey is generated by the user. It needs to be guaranteed by the user to
@@ -286,19 +248,16 @@ XXTERN svScope svGetScopeFromName(const char* scopeName);
  * be impossible to discern error status returns when calling svGetUserData()
  */
 XXTERN int svPutUserData(const svScope scope, void* userKey, void* userData);
-
 /*
  * Retrieve an arbitrary user data pointer that was previously
  * stored by a call to svPutUserData(). See the comment above
  * svPutUserData() for an explanation of userKey, as well as
  * restrictions on NULL and illegal svScope and userKey values.
- * This function returns NULL for all error cases, and a non-Null
- * user data pointer upon success.
+ * This function returns NULL for all error cases, 0 upon success.
  * This function also returns NULL in the event that a prior call
  * to svPutUserData() was never made.
  */
 XXTERN void* svGetUserData(const svScope scope, void* userKey);
-
 /*
  * Returns the file and line number in the SV code from which the import call
  * was made. If this information available, returns TRUE and updates fileName
@@ -311,13 +270,11 @@ XXTERN void* svGetUserData(const svScope scope, void* userKey);
  * Applications shall not modify this string or free it.
  */
 XXTERN int svGetCallerInfo(const char** fileName, int* lineNumber);
-
 /*
  * Returns 1 if the current execution thread is in the disabled state.
  * Disable protocol shall be adhered to if in the disabled state.
  */
 XXTERN int svIsDisabledState(void);
-
 /*
  * Imported functions call this API function during disable processing to
  * acknowledge that they are correctly participating in the DPI disable protocol.
@@ -325,7 +282,6 @@ XXTERN int svIsDisabledState(void);
  * in the disabled state.
  */
 XXTERN void svAckDisabledState(void);
-
 /*
  * Retrieve the current simulation time, scaled to the time unit of the scope.
  * If scope is NULL, then time is scaled to the simulation time unit.
@@ -333,7 +289,6 @@ XXTERN void svAckDisabledState(void);
  * This function returns -1 for all error cases, 0 upon success.
  */
 XXTERN int svGetTime(const svScope scope, svTimeVal* time);
-
 /*
  * Retrieve the time unit for scope.
  * If scope is NULL, then simulation time unit is retrieved.
@@ -341,7 +296,6 @@ XXTERN int svGetTime(const svScope scope, svTimeVal* time);
  * This function returns -1 for all error cases, 0 upon success.
  */
 XXTERN int svGetTimeUnit(const svScope scope, int32_t* time_unit);
-
 /*
  * Retrieve the time precision for scope.
  * If scope is NULL, then simulation time unit is retrieved.
@@ -349,15 +303,13 @@ XXTERN int svGetTimeUnit(const svScope scope, int32_t* time_unit);
  * This function returns -1 for all error cases, 0 upon success.
  */
 XXTERN int svGetTimePrecision(const svScope scope, int32_t* time_precision);
-
 /*
  **********************************************************
  * DEPRECATED PORTION OF FILE STARTS FROM HERE.
  * IEEE-1800-compliant tools may not provide
- * support for the following functionality
+ * support for the following functionality.
  **********************************************************
  */
-
 /*
  * Canonical representation of packed arrays
  * 2-state and 4-state vectors, modeled upon PLI's avalue/bvalue
@@ -365,31 +317,26 @@ XXTERN int svGetTimePrecision(const svScope scope, int32_t* time_precision);
 #define SV_CANONICAL_SIZE(WIDTH) (((WIDTH) + 31) >> 5)
 typedef unsigned int svBitVec32; /* (a chunk of) packed bit array */
 typedef struct {
-    unsigned int c;
-    unsigned int d;
+  unsigned int c;
+  unsigned int d;
 } svLogicVec32; /* (a chunk of) packed logic array */
-
 /* reference to a standalone packed array */
 typedef void* svBitPackedArrRef;
 typedef void* svLogicPackedArrRef;
-
 /*
  * total size in bytes of the simulator's representation of a packed array
  * width in bits
  */
 XXTERN int svSizeOfBitPackedArr(int width);
 XXTERN int svSizeOfLogicPackedArr(int width);
-
 /* Translation between the actual representation and the canonical representation */
 /* s=source, d=destination, w=width */
 /* actual <-- canonical */
 XXTERN void svPutBitVec32(svBitPackedArrRef d, const svBitVec32* s, int w);
 XXTERN void svPutLogicVec32(svLogicPackedArrRef d, const svLogicVec32* s, int w);
-
 /* canonical <-- actual */
 XXTERN void svGetBitVec32(svBitVec32* d, const svBitPackedArrRef s, int w);
 XXTERN void svGetLogicVec32(svLogicVec32* d, const svLogicPackedArrRef s, int w);
-
 /*
  * Bit-select functions
  * Packed arrays are assumed to be indexed n-1:0,
@@ -398,11 +345,9 @@ XXTERN void svGetLogicVec32(svLogicVec32* d, const svLogicPackedArrRef s, int w)
 /* s=source, i=bit-index */
 XXTERN svBit svGetSelectBit(const svBitPackedArrRef s, int i);
 XXTERN svLogic svGetSelectLogic(const svLogicPackedArrRef s, int i);
-
 /* d=destination, i=bit-index, s=scalar */
 XXTERN void svPutSelectBit(svBitPackedArrRef d, int i, svBit s);
 XXTERN void svPutSelectLogic(svLogicPackedArrRef d, int i, svLogic s);
-
 /*
  * functions for part-select
  *
@@ -415,27 +360,22 @@ XXTERN void svPutSelectLogic(svLogicPackedArrRef d, int i, svLogic s);
  * s=source, d=destination, i=starting bit index, w=width
  * like for variable part-selects; limitations: w <= 32
  */
-
 /* canonical <-- actual */
 XXTERN void svGetPartSelectBit(svBitVec32* d, const svBitPackedArrRef s, int i, int w);
 XXTERN svBitVec32 svGetBits(const svBitPackedArrRef s, int i, int w);
 XXTERN svBitVec32 svGet32Bits(const svBitPackedArrRef s, int i); /* 32-bits */
 XXTERN uint64_t svGet64Bits(const svBitPackedArrRef s, int i);
-
 /* 64-bits */
 XXTERN void svGetPartSelectLogic(svLogicVec32* d, const svLogicPackedArrRef s, int i, int w);
-
 /* actual <-- canonical */
 XXTERN void svPutPartSelectBit(svBitPackedArrRef d, const svBitVec32 s, int i, int w);
 XXTERN void svPutPartSelectLogic(svLogicPackedArrRef d, const svLogicVec32 s, int i, int w);
-
 /*
  * Functions for open array translation between simulator and canonical
  * representations. These functions copy the whole packed array in either
  * direction. The user is responsible for allocating an array in the
  * canonical representation.
  */
-
 /* s=source, d=destination */
 /* actual <-- canonical */
 XXTERN void svPutBitArrElemVec32(const svOpenArrayHandle d, const svBitVec32* s, int indx1, ...);
@@ -446,7 +386,6 @@ XXTERN void svPutLogicArrElemVec32(const svOpenArrayHandle d, const svLogicVec32
 XXTERN void svPutLogicArrElem1Vec32(const svOpenArrayHandle d, const svLogicVec32* s, int indx1);
 XXTERN void svPutLogicArrElem2Vec32(const svOpenArrayHandle d, const svLogicVec32* s, int indx1, int indx2);
 XXTERN void svPutLogicArrElem3Vec32(const svOpenArrayHandle d, const svLogicVec32* s, int indx1, int indx2, int indx3);
-
 /* canonical <-- actual */
 XXTERN void svGetBitArrElemVec32(svBitVec32* d, const svOpenArrayHandle s, int indx1, ...);
 XXTERN void svGetBitArrElem1Vec32(svBitVec32* d, const svOpenArrayHandle s, int indx1);
@@ -456,23 +395,18 @@ XXTERN void svGetLogicArrElemVec32(svLogicVec32* d, const svOpenArrayHandle s, i
 XXTERN void svGetLogicArrElem1Vec32(svLogicVec32* d, const svOpenArrayHandle s, int indx1);
 XXTERN void svGetLogicArrElem2Vec32(svLogicVec32* d, const svOpenArrayHandle s, int indx1, int indx2);
 XXTERN void svGetLogicArrElem3Vec32(svLogicVec32* d, const svOpenArrayHandle s, int indx1, int indx2, int indx3);
-
 /*
  **********************************************************
  * DEPRECATED PORTION OF FILE ENDS HERE.
  **********************************************************
  */
-
 #undef DPI_EXTERN
-
 #ifdef DPI_PROTOTYPES
 #undef DPI_PROTOTYPES
 #undef XXTERN
 #undef EETERN
 #endif
-
 #ifdef __cplusplus
 }
 #endif
-
 #endif

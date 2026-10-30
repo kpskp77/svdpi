@@ -1,12 +1,12 @@
 ---
 BasedOnStyle: Google
-IndentWidth: 4
+IndentWidth: 2
 TabWidth: 4
 UseTab: Never
-ColumnLimit: 128
+ColumnLimit: 150
 AllowShortFunctionsOnASingleLine: Inline
 AllowShortIfStatementsOnASingleLine: WithoutElse
-AllowShortLoopsOnASingleLine: false
+AllowShortLoopsOnASingleLine: true
 BreakBeforeBraces: Attach
 IndentAccessModifiers: false
 AccessModifierOffset: -2
